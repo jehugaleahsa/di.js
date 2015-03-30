@@ -82,7 +82,7 @@ If you want to make changes to the library, you can setup the development enviro
     npm install gulp
     npm install karma
     npm install karma-phantomjs-launcher
-    npm install mocha
+    npm install karma-mocha
     npm install chai
 	
 Once your environment is setup, you can run the test suite simply by typing `gulp` at the command line.
