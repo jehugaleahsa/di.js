@@ -71,6 +71,13 @@ If you don't want to use the global dependency injection container, you can crea
     var empty = di();  // creates an empty DI container
     
 Any configurations on other containers will not appear in the new container. This is useful when you want a different DI configuration for a small section of code.
+
+### Aliases
+You can pass multiple names to the `bind` method to create multiple aliases for the same factory function:
+
+   di.bind('add', 'sum').to([function () {
+       return function (x, y) { return x + y };
+   }]);
 	
 ## Suggesting Features
 If you would like to use di.js and have a specific need, just let me know.

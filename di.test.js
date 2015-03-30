@@ -4,7 +4,7 @@
 
     suite('di', function () {
 
-        test('shouldGetBoundConstant', function () {
+        test('shouldGetBoundConstant_toConstant', function () {
 
 			var name = 'constant';
 			var value = 123;
@@ -53,7 +53,7 @@
 			
 		});
 		
-		test('shouldRecreateValuesUnlessSingleton', function () {
+		test('shouldCallFactoryFunction_transient_get', function () {
 			
 			var name = 'parent';
 			di.bind(name).to([function () {
@@ -66,7 +66,7 @@
 			assert.notEqual(first, second, 'Values should not be cached unless explicitly marked as singleton.');
 		});
 		
-		test('shouldOnlyCreateSingleValueWhenSingleton', function () {
+		test('shouldCallFactoryFunctionOnce_singleton_get', function () {
 			
 			var name = 'parent';
 			var config = di.bind(name).to([function () {
@@ -85,7 +85,7 @@
 			assert.notEqual(first, third, 'The dependency was still being treated as a singleton.');
 		});
 		
-		test('shouldUseAlternateThisArg', function () {
+		test('shouldUseAlternateThisArg_forThis', function () {
 			
 			var name = 'parent';
 			var instance = { count: 0 };
@@ -99,7 +99,7 @@
 			
 		});
 		
-		test('callCreatesEmptyContainer', function () {
+		test('shouldCreateEmptyContainer_()', function () {
 			
 			var name = 'parent';
 			di.bind(name).toConstant(123);
@@ -108,6 +108,76 @@
 			assert.isUndefined(container.get(name), 'An empty container was not returned.');
 			
 		});
+		
+		test('shouldAliasInstances', function() {
+			
+			var name1 = 'parent1';
+			var name2 = 'parent2'
+			di.bind(name1, name2).toConstant({}).singleton();
+			
+			var first = di.get(name1);
+			var second = di.get(name2);
+			
+			assert.strictEqual(first, second, 'Incorrectly treated aliases as two different singleton bindings.');
+			
+		});
+        
+        test('shouldRemoveBindings', function () {
+            
+            var name = 'parent';
+            di.bind(name).to([function () {
+                return 123;
+            }]).singleton();
+            
+            // Calling get will cause the factory function result to be cached in the singletons object
+            var result = di.get(name);
+            
+            di.unbind(name);
+            
+            result = di.get(name);            
+            assert.isUndefined(result, 'Undefined to should be returned when calling an unbound dependency.');
+            
+            // Now we bind the same name to a different factory function.
+            // The value cached in the singleton object should no longer be returned.
+            di.bind(name).to([function () {
+                return 234;
+            }]).singleton();
+            
+            result = di.get(name);
+            assert.strictEqual(234, result);
+            
+        });
+        
+        test('shouldRemoveAlias', function () {
+            
+            var name1 = 'parent1';
+            var name2 = 'parent2';
+            di.bind(name1, name2).to([function () {
+                return {};
+            }]).singleton();
+            
+            // Calling get will cause the factory function result to be cached in the singletons object
+            var before = di.get(name1);
+            
+            di.unbind(name1);
+            
+            var after = di.get(name1);
+            assert.isUndefined(after, 'Undefined to should be returned when calling an unbound dependency.');
+            
+            // Even though the first alias is removed, the second alias should still get the singleton.
+            var other = di.get(name2);
+            assert.strictEqual(before, other, 'The singleton was not associated with the second alias.');
+            
+            // Now we bind the same name to a different factory function.
+            // The value cached in the singleton object should no longer be returned.
+            di.bind(name1).to([function () {
+                return 234;
+            }]).singleton();
+            
+            var rebound = di.get(name1);
+            assert.strictEqual(234, rebound);
+            
+        });
 
     });
 
