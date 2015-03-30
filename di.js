@@ -1,12 +1,10 @@
 'use strict';
 
-var di = (function () { 
-
-    if (!Array.isArray) {
-      Array.isArray = function(arg) {
-        return Object.prototype.toString.call(arg) === '[object Array]';
-      };
-    }
+var di = (function () {
+    
+    var isArray = Array.isArray 
+        ? Array.isArray
+        : (function (arg) { return Object.prototype.toString.call(arg) === '[object Array]'; });
 
     function getContainer() {
         var container = function () { 
@@ -29,7 +27,7 @@ var di = (function () {
     function getNamedConfiguration(container, names) {
         var configuration = {};
         configuration.to = function (spec) {
-            if (!Array.isArray(spec) || spec.length == 0) {
+            if (!isArray(spec) || spec.length == 0) {
                 throw new Exception('Encountered an invalid binding specification.');
             }
             var factory = spec[spec.length - 1];
