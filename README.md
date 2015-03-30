@@ -63,6 +63,7 @@ This library is new and will be part of a growing set of related libraries.
 	
 ## Developing di.js
 If you want to make changes to the library, you can setup the development environment with:
+
     npm install gulp
     npm install karma
     npm install karma-phantomjs-launcher
