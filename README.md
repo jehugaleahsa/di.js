@@ -2,60 +2,75 @@
 The simplest dependency injection library that could possibly work.
 
 ## Overview
-di.js is a simple dependency injection library based on AngularJS dependency injection.
+di.js is a simple dependency injection library. It allows you to quickly build up an object graph of inter-dependent objects using a simple declarative configuration.
 
-A factory method is associated with a name by calling the `bind` method:
+### Simple Configuration
+Each dependency is built using a factory function, associated to an arbitrary name. The dependency is configured using the `bind` method:
 
-	di.bind('myDependency').to([function () {
-		return 123;
-	}]);
+    di.bind('limit').to([function () {
+        return 123;
+    }]);
 
-Notice that the factory function appears within an array.
-Once a factory method is bound to a name, you can call it using `get`:
+Notice that the factory function appears within an array! The array syntax will be explained below.
 
-	var dependency = di.get('myDependency');
+Once a factory function is bound to a name, you can call it using `get`:
+
+    var limit = di.get('limit');  // limit === 123
 	
-Dependencies are injected by listing the dependencies as a list of names preceding the factory method:
+Whenever a dependency is requested, di.js will lookup the factory function by name and call it. It returns whatever the factory function returns.
 
-	di.bind('otherDependency').to(['myDependency', function (myDependency) {
-		// myDependency === di.get('myDependency');
-		return 234;
-	}]);
+### Injecting Dependencies
+You can pass dependencies to your factory functions by listing their names before the factory function:
+
+    di.bind('random').to(['limit', function (limit) {
+        // limit === di.get('limit');
+        return Math.random() * limit;
+    }]);
 	
-If the value being injected is a simple value, you can use `toConstant`:
+### Constants
+If the value being injected is a constant value, you can use `toConstant`:
 
-	di.bind('constant').toConstant(123);
+    di.bind('constant').toConstant(123);
 	
-This can also be used as a short-hand for factory methods without dependencies:
+### Singletons
+Every time you request a dependency using `get` the factory function will be called again. If you want to make sure your factory function only gets called one time, use the `singleton` method:
 
-	di.bind('constantFoo').toConstant(function () {
-		return 123;
-	});
+    di.bind('factory').to([function (){
+        return [1, 2, 3];
+    }]).singleton();
 	
-You can specify a binding as a singleton using the `singleton` method:
+You can switch back to normal behavior by calling `transient` instead.
 
-	di.bind('factory').to([function (){
-		return [1, 2, 3];
-	}]).singleton();
+### Factories with State
+In some rare circumstances, your factory function needs to track some state. One option is to put that state in the global scope and refer to it within the factory function. If you don't want to dirty the global scope, you can pass an object to the `forThis` method. The factory function will be bound to the object, becoming a factory *method*:
+
+    di.bind('generator').to([function () {
+        return ++this.count;
+    }]).forThis({ count: 0 });
 	
-The same array (`[123]`) will be returned every time the binding is resolved.
-If needed, you can call `forThis` to specify the `this` arg passed to the factory:
+This is a short-hand for the following code:
 
-	var counter = { count: 0 };
-	di.bind('factory').to([function () {
-		++this.count;
-		return this;
-	}]).forThis(counter);
+    (function () {
+        var counter = { count: 0 };
+        di.bind('generator').to([function () {
+            return ++counter.count;
+        }]);
+    })();
 	
-If a factory returns a function, the `forThis` instance will also be applied to the function, as well.
+If a factory *returns* a function, the `forThis` instance will also be applied to the inner function, as well.
 
-	var counter = { count: 0 };
 	di.bind('factory').to([function () {
 		return function () {
-			++this.count;
-			return this;
+			return ++this.count;
 		};
-	}]).forThis(counter);
+	}]).forThis({ count: 0 });
+
+### Spawning New Containers
+If you don't want to use the global dependency injection container, you can create a new one:
+
+    var empty = di();  // creates an empty DI container
+    
+Any configurations on other containers will not appear in the new container. This is useful when you want a different DI configuration for a small section of code.
 	
 ## Suggesting Features
 If you would like to use di.js and have a specific need, just let me know.
