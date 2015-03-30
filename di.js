@@ -69,6 +69,10 @@ var di = (function () {
 			singleton: function () {
 				binding.scope = container.singletons;
 				return this;
+			},
+			transient: function () {
+				binding.scope = null;
+				return this;
 			}
 		}
 	}

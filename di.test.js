@@ -69,15 +69,20 @@
 		test('shouldOnlyCreateSingleValueWhenSingleton', function () {
 			
 			var name = 'parent';
-			di.bind(name).to([function () {
+			var config = di.bind(name).to([function () {
 				return {};
 			}]).singleton();
 			
 			var first = di.get(name);
 			var second = di.get(name);
 			
-			assert.strictEqual(first, second);
+			assert.strictEqual(first, second, 'The dependency was not treated as a singleton.');
 			
+			config.transient();
+			
+			var third = di.get(name);
+			
+			assert.notEqual(first, third, 'The dependency was still being treated as a singleton.');
 		});
 		
 		test('shouldUseAlternateThisArg', function () {
