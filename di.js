@@ -204,19 +204,15 @@ var di = (function () {
     
     function getDependenciesAsync(container, binding, cache, success, error) {
         var dependencies = [];
-		var hasError = false;
+		var resolved = 0;
         for (var index = 0; index !== binding.dependencies.length; ++index) {
             var dependencyName = binding.dependencies[index];
             getAsync(container, dependencyName, cache, function (value) {
+				++resolved;
                 dependencies[index] = value;
-            }, function (value) {
-				hasError = true;
-				dependencies[index] = value;
-			});
+            }, error);
         }
-		if (hasError) {
-			error(dependencies);
-		} else {
+		if (resolved === binding.dependencies.length) {
 			success(dependencies);
 		}
     }
