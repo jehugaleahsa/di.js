@@ -50,7 +50,6 @@ var di = (function () {
         var nameLookup = getNameLookup(names);
         var binding = {
             names: nameLookup,
-            thisArg: null,
             scope: null,
             dependencies: dependencies,
             factory: factory
@@ -74,10 +73,6 @@ var di = (function () {
     
     function getBindingConfiguration(container, binding) {
         return {
-            forThis: function (thisArg) {
-                binding.thisArg = thisArg;
-                return this;
-            },
             singleton: function () {
                 binding.scope = container.singletons;
                 return this;
@@ -118,9 +113,6 @@ var di = (function () {
         var thisArg = binding.thisArg;
         var dependencies = getDependencies(container, binding, cache);
         var value = factory.apply(thisArg, dependencies);
-        if (typeof value === 'function') {
-            value = value.bind(thisArg);
-        }
         return value;
     }
     

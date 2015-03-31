@@ -85,20 +85,6 @@
 			assert.notEqual(first, third, 'The dependency was still being treated as a singleton.');
 		});
 		
-		test('shouldUseAlternateThisArg_forThis', function () {
-			
-			var name = 'parent';
-			var instance = { count: 0 };
-			di.bind(name).to([function () {
-				++this.count;
-				return this;
-			}]).forThis(instance);
-			var result = di.get(name);
-			assert.strictEqual(instance, result, 'The wrong instance was returned by the factory.');
-			assert.equal(1, instance.count, 'The factory method was called the wrong number of times.');
-			
-		});
-		
 		test('shouldCreateEmptyContainer_()', function () {
 			
 			var name = 'parent';

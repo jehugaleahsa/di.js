@@ -41,30 +41,6 @@ Every time you request a dependency using `get` the factory function will be cal
 	
 You can switch back to normal behavior by calling `transient` instead.
 
-### Factories with State
-In some rare circumstances, your factory function needs to track some state. One option is to put that state in the global scope and refer to it within the factory function. If you don't want to dirty the global scope, you can pass an object to the `forThis` method. The factory function will be bound to the object, becoming a factory *method*:
-
-    di.bind('generator').to([function () {
-        return ++this.count;
-    }]).forThis({ count: 0 });
-	
-This is a short-hand for the following code:
-
-    (function () {
-        var counter = { count: 0 };
-        di.bind('generator').to([function () {
-            return ++counter.count;
-        }]);
-    })();
-	
-If a factory *returns* a function, the `forThis` instance will also be applied to the inner function, as well.
-
-	di.bind('factory').to([function () {
-		return function () {
-			return ++this.count;
-		};
-	}]).forThis({ count: 0 });
-
 ### Spawning New Containers
 If you don't want to use the global dependency injection container, you can create a new one:
 
