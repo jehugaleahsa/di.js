@@ -147,6 +147,27 @@
             assert.strictEqual(234, result);
             
         });
+		
+		test('shouldReplaceBindings', function () {
+            
+            var name = 'parent';
+            di.bind(name).to([function () {
+                return 123;
+            }]).singleton();
+            
+            // Calling get will cause the factory function result to be cached in the singletons object
+            var result = di.get(name);
+            
+            // Now we bind the same name to a different factory function.
+            // The value cached in the singleton object should no longer be returned.
+            di.bind(name).to([function () {
+                return 234;
+            }]).singleton();
+            
+            result = di.get(name);
+            assert.strictEqual(234, result);
+            
+        });
         
         test('shouldRemoveAlias', function () {
             

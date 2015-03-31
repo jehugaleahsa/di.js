@@ -57,6 +57,7 @@ var di = (function () {
         };
         for (var index = 0; index !== names.length; ++index) {
             var name = names[index];
+			unbind(container, name);
             container.bindings[name] = binding;
         }
         return binding;
