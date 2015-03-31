@@ -21,6 +21,7 @@ var di = (function () {
         container.unbind = function (name) {
             unbind(container, name);
         };
+        container.async = getAsyncContainer();
         return container;
     };
     
@@ -56,7 +57,7 @@ var di = (function () {
         };
         for (var index = 0; index !== names.length; ++index) {
             var name = names[index];
-			unbind(container, name);
+            unbind(container, name);
             container.bindings[name] = binding;
         }
         return binding;
@@ -110,9 +111,8 @@ var di = (function () {
     
     function resolve(container, binding, cache) {
         var factory = binding.factory;
-        var thisArg = binding.thisArg;
         var dependencies = getDependencies(container, binding, cache);
-        var value = factory.apply(thisArg, dependencies);
+        var value = factory.apply(null, dependencies);
         return value;
     }
     
@@ -140,6 +140,85 @@ var di = (function () {
         delete container.bindings[name];
         delete container.singletons[name];
         delete binding.names[name];
+    }
+    
+    function getAsyncContainer() {
+        var container = {};
+        container.singletons = {};
+        container.bindings = {};
+        container.bind = function () {
+            var configuration = getNamedConfiguration(this, arguments);
+            configuration.toConstant = function (value) {
+                this.to([function (callback) {
+                    callback(value);
+                }]);
+            };
+            return configuration;
+        };
+        container.get = function (name, success, error) {
+            return getAsync(this, name, {}, success, error);
+        };
+        container.unbind = function (name) {
+            unbind(container, name);
+        };
+        return container;
+    };
+    
+    function getAsync(container, name, cache, success, error) {
+        if (name in cache) {
+            success(cache[name]);
+        }
+        var binding = container.bindings[name];
+        if (typeof binding === 'undefined') {
+            error();
+        }
+        
+        if (binding.scope) {
+            if (name in binding.scope) {
+                var value = binding.scope[name];
+                updateCache(cache, binding.names, value);
+                success(value);
+            } else {
+                resolveAsync(container, binding, cache, function (value) {
+                    updateCache(binding.scope, binding.names, value);
+                    updateCache(cache, binding.names, value);
+                    success(value);
+                }, error);
+            }
+        } else {
+            resolveAsync(container, binding, cache, function (value) {
+                updateCache(cache, binding.names, value);
+                success(value);
+            }, error);
+        }
+    }
+    
+    function resolveAsync(container, binding, cache, success, error) {
+        var factory = binding.factory;
+        getDependenciesAsync(container, binding, cache, function (dependencies) {
+            dependencies.push(success);
+			dependencies.push(error);
+            factory.apply(null, dependencies);
+        }, error);
+    }
+    
+    function getDependenciesAsync(container, binding, cache, success, error) {
+        var dependencies = [];
+		var hasError = false;
+        for (var index = 0; index !== binding.dependencies.length; ++index) {
+            var dependencyName = binding.dependencies[index];
+            getAsync(container, dependencyName, cache, function (value) {
+                dependencies[index] = value;
+            }, function (value) {
+				hasError = true;
+				dependencies[index] = value;
+			});
+        }
+		if (hasError) {
+			error(dependencies);
+		} else {
+			success(dependencies);
+		}
     }
     
     return getContainer();

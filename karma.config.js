@@ -5,7 +5,7 @@ module.exports = function(config) {
         files: [
 			'./node_modules/chai/chai.js',
             './di.js',
-            './di.test.js'
+            './*.test.js'
         ],
         singleRun: true,
         client: {
