@@ -226,6 +226,17 @@
             });
             verify(promise, done).then(function () {});
         });
+        
+        test('shouldResolveNonPromise', function (done) {
+            
+            var name = 'parent1';
+            di.async.bind(name).to([function () {
+                return 123;
+            }]);
+            
+            assert.eventually.equal(di.async.get(name), 123)
+                .notify(done);
+        });
 
     });
 

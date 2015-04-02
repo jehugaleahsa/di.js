@@ -55,6 +55,34 @@ You can pass multiple names to the `bind` method to create multiple aliases for 
         return function (x, y) { return x + y };
     }]);
     
+### Async
+If you are working in an asynchronous environment, you can use the async version of the library.
+Configuring bindings is exactly the same as the synchronous operations, except operations are performed on `di.async` instead:
+
+    di.async.bind('data').to(['$http', function ($http) {
+        return $http.get('/path/to/resource');  // async operation returning promise
+    });
+    
+The only real difference is that the factory functions should return a promise instead of an object. The promises need to be compatible for [ES6 promises](http://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Once you have your bindings configured, you can call `get`, which will return a promise, allowing you to work with the object:
+
+    di.async.get('data').then(function (response) {
+        // do something with the response
+    }, function (error) {
+        // handle an error
+    });
+    
+If for whatever reason your factory function returns a non-promise, that object will be automatically wrapped in a promise on your behalf. This is useful when you simply want to return a calculated value that doesn't require hitting an asynchronous service:
+
+    di.async.bind('data-array').to(['data', function (data) {
+        return [data];
+    });
+    
+This is equivalent to the more verbose code:
+
+    di.async.bind('data-array').to(['data', function (data) {
+        return Promise.resolve([data]);
+    }]);
+    
 ## Suggesting Features
 If you would like to use di.js and have a specific need, just let me know.
 This library is new and will be part of a growing set of related libraries.

@@ -194,6 +194,9 @@ var di = (function () {
 				return cache[name];
 			}
             var result = factory.apply(null, values);
+            if (!(result instanceof Promise)) {
+                result = Promise.resolve(result);
+            }
 			updateAsyncCache(cache, binding.names, result);
 			return result;
 		});
