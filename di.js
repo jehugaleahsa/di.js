@@ -149,14 +149,14 @@ var di = (function () {
         container.bind = function () {
             var configuration = getNamedConfiguration(this, arguments);
             configuration.toConstant = function (value) {
-                this.to([function (callback) {
-                    callback(value);
+                return this.to([function () {
+					return Promise.resolve(value);
                 }]);
             };
             return configuration;
         };
-        container.get = function (name, success, error) {
-            return getAsync(this, name, {}, success, error);
+        container.get = function (name) {
+            return getAsync(this, name, {});
         };
         container.unbind = function (name) {
             unbind(container, name);
@@ -164,57 +164,56 @@ var di = (function () {
         return container;
     };
     
-    function getAsync(container, name, cache, success, error) {
-        if (name in cache) {
-            success(cache[name]);
-        }
+    function getAsync(container, name, cache) {
         var binding = container.bindings[name];
         if (typeof binding === 'undefined') {
-            error();
+			return Promise.reject();
         }
         
         if (binding.scope) {
             if (name in binding.scope) {
-                var value = binding.scope[name];
-                updateCache(cache, binding.names, value);
-                success(value);
+				var promise = binding.scope[name];
+				updateAsyncCache(cache, binding.names, promise);
+				return promise;
             } else {
-                resolveAsync(container, binding, cache, function (value) {
-                    updateCache(binding.scope, binding.names, value);
-                    updateCache(cache, binding.names, value);
-                    success(value);
-                }, error);
+                var promise = resolveAsync(container, name, binding, cache);
+				updateAsyncCache(binding.scope, binding.names, promise);
+				return promise;
             }
         } else {
-            resolveAsync(container, binding, cache, function (value) {
-                updateCache(cache, binding.names, value);
-                success(value);
-            }, error);
+            var promise = resolveAsync(container, name, binding, cache);
+			return promise;
         }
     }
     
-    function resolveAsync(container, binding, cache, success, error) {
+    function resolveAsync(container, name, binding, cache) {
         var factory = binding.factory;
-        getDependenciesAsync(container, binding, cache, function (dependencies) {
-            dependencies.push(success);
-			dependencies.push(error);
-            factory.apply(null, dependencies);
-        }, error);
+		var promises = getDependencyPromises(container, binding, cache);
+		var promise = Promise.all(promises).then(function (values) {
+			if (name in cache) {
+				return cache[name];
+			}
+            var result = factory.apply(null, values);
+			updateAsyncCache(cache, binding.names, result);
+			return result;
+		});
+		return promise;
     }
     
-    function getDependenciesAsync(container, binding, cache, success, error) {
-        var dependencies = [];
-		var resolved = 0;
+    function getDependencyPromises(container, binding, cache) {
+        var promises = [];
         for (var index = 0; index !== binding.dependencies.length; ++index) {
             var dependencyName = binding.dependencies[index];
-            getAsync(container, dependencyName, cache, function (value) {
-				++resolved;
-                dependencies[index] = value;
-            }, error);
+            var promise = getAsync(container, dependencyName, cache);
+			promises.push(promise);
         }
-		if (resolved === binding.dependencies.length) {
-			success(dependencies);
-		}
+		return promises;
+    }
+	
+	function updateAsyncCache(cache, names, promise) {
+        for (var name in names) {
+            cache[name] = promise;
+        }
     }
     
     return getContainer();

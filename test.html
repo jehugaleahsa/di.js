@@ -1,15 +1,20 @@
+<!DOCTYPE html>
 <html>
 	<head>
+		<meta charset="UTF-8"></meta>
 	</head>
 	<body>
 		<div id="mocha"></div>
-		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/mocha/2.2.1/mocha.min.css" />
+		<link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/mocha/2.2.1/mocha.min.css" />
+		<script type="text/javascript" src="http://cdn.jsdelivr.net/es6-promise/1.0.0/promise.min.js"></script>
 		<script type="text/javascript" src="di.js"></script>
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mocha/2.2.1/mocha.min.js"></script>
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chai/2.2.0/chai.min.js"></script>
+		<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/mocha/2.2.1/mocha.min.js"></script>
+		<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/chai/2.2.0/chai.min.js"></script>
+		<script type="text/javascript" src="http://raw.githubusercontent.com/domenic/chai-as-promised/master/lib/chai-as-promised.js"></script>
 		<script type="text/javascript">
 			mocha.setup('tdd');
 		</script>
+		<script type="text/javascript" src="di.test.js"></script>
 		<script type="text/javascript" src="di.async.test.js"></script>
 		<script type="text/javascript">
 			mocha.run();

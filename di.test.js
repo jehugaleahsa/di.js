@@ -1,6 +1,6 @@
 (function () {
     
-    var assert = chai.assert;
+	var assert = chai.assert;
 
     suite('di', function () {
 
@@ -19,7 +19,7 @@
             di.bind(dependencyName).toConstant({});
             
             var parentName = 'parent';
-            di.bind(parent).to([dependencyName, dependencyName, function (dependency1, dependency2) {
+            di.bind(parentName).to([dependencyName, dependencyName, function (dependency1, dependency2) {
                 assert.strictEqual(dependency1, dependency2, 'The same object was not returned for both dependencies.');
                 return {};
             }]);

@@ -16,7 +16,7 @@ Notice that the factory function appears within an array! The array syntax will 
 Once a factory function is bound to a name, you can call it using `get`:
 
     var limit = di.get('limit');  // limit === 123
-	
+    
 Whenever a dependency is requested, di.js will lookup the factory function by name and call it. It returns whatever the factory function returns.
 
 ### Injecting Dependencies
@@ -26,19 +26,19 @@ You can pass dependencies to your factory functions by listing their names befor
         // limit === di.get('limit');
         return Math.random() * limit;
     }]);
-	
+    
 ### Constants
 If the value being injected is a constant value, you can use `toConstant`:
 
     di.bind('constant').toConstant(123);
-	
+    
 ### Singletons
 Every time you request a dependency using `get` the factory function will be called again. If you want to make sure your factory function only gets called one time, use the `singleton` method:
 
     di.bind('factory').to([function (){
         return [1, 2, 3];
     }]).singleton();
-	
+    
 You can switch back to normal behavior by calling `transient` instead.
 
 ### Spawning New Containers
@@ -51,14 +51,14 @@ Any configurations on other containers will not appear in the new container. Thi
 ### Aliases
 You can pass multiple names to the `bind` method to create multiple aliases for the same factory function:
 
-   di.bind('add', 'sum').to([function () {
-       return function (x, y) { return x + y };
-   }]);
-	
+    di.bind('add', 'sum').to([function () {
+        return function (x, y) { return x + y };
+    }]);
+    
 ## Suggesting Features
 If you would like to use di.js and have a specific need, just let me know.
 This library is new and will be part of a growing set of related libraries.
-	
+    
 ## Developing di.js
 If you want to make changes to the library, you can setup the development environment with:
 
@@ -66,8 +66,9 @@ If you want to make changes to the library, you can setup the development enviro
     npm install karma
     npm install karma-phantomjs-launcher
     npm install karma-mocha
-    npm install chai
-	
+    npm install karma-chai
+    npm install karma-chai-as-promised
+    
 Once your environment is setup, you can run the test suite simply by typing `gulp` at the command line.
 
 ## License
