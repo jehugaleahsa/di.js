@@ -33,10 +33,10 @@
             
             var dependencyName = 'dependency';
             var count = 0;  // track how many times to factory is called
-            di.bind(dependencyName).to([function () {
+            di.bind(dependencyName).to(function () {
                 ++count;
                 return {};
-            }]);
+            });
             
             var parentName1 = 'parent1';
             di.bind(parentName1).to([dependencyName, function (dependency) {
@@ -56,9 +56,9 @@
         test('shouldCallFactoryFunction_transient_get', function () {
             
             var name = 'parent';
-            di.bind(name).to([function () {
-                return {};
-            }]);
+            di.bind(name).to(function () { 
+                return {}; 
+            }).transient();
             
             var first = di.get(name);
             var second = di.get(name);
@@ -69,9 +69,9 @@
         test('shouldCallFactoryFunctionOnce_singleton_get', function () {
             
             var name = 'parent';
-            var config = di.bind(name).to([function () {
+            var config = di.bind(name).to(function () {
                 return {};
-            }]).singleton();
+            }).singleton();
             
             var first = di.get(name);
             var second = di.get(name);
@@ -111,9 +111,7 @@
         test('shouldRemoveBindings', function () {
             
             var name = 'parent';
-            di.bind(name).to([function () {
-                return 123;
-            }]).singleton();
+            di.bind(name).toConstant(123).singleton();
             
             // Calling get will cause the factory function result to be cached in the singletons object
             var result = di.get(name);
@@ -125,9 +123,7 @@
             
             // Now we bind the same name to a different factory function.
             // The value cached in the singleton object should no longer be returned.
-            di.bind(name).to([function () {
-                return 234;
-            }]).singleton();
+            di.bind(name).toConstant(234).singleton();
             
             result = di.get(name);
             assert.strictEqual(234, result);
@@ -137,18 +133,14 @@
         test('shouldReplaceBindings', function () {
             
             var name = 'parent';
-            di.bind(name).to([function () {
-                return 123;
-            }]).singleton();
+            di.bind(name).toConstant(123).singleton();
             
             // Calling get will cause the factory function result to be cached in the singletons object
             var result = di.get(name);
             
             // Now we bind the same name to a different factory function.
             // The value cached in the singleton object should no longer be returned.
-            di.bind(name).to([function () {
-                return 234;
-            }]).singleton();
+            di.bind(name).toConstant(234).singleton();
             
             result = di.get(name);
             assert.strictEqual(234, result);
@@ -177,9 +169,7 @@
             
             // Now we bind the same name to a different factory function.
             // The value cached in the singleton object should no longer be returned.
-            di.bind(name1).to([function () {
-                return 234;
-            }]).singleton();
+            di.bind(name1).toConstant(234).singleton();
             
             var rebound = di.get(name1);
             assert.strictEqual(234, rebound);

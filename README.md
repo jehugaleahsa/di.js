@@ -7,11 +7,9 @@ di.js is a simple dependency injection library. It allows you to quickly build u
 ### Simple Configuration
 Each dependency is built using a factory function, associated to an arbitrary name. The dependency is configured using the `bind` method:
 
-    di.bind('limit').to([function () {
+    di.bind('limit').to(function () {
         return 123;
-    }]);
-
-Notice that the factory function appears within an array! The array syntax will be explained below.
+    });
 
 Once a factory function is bound to a name, you can call it using `get`:
 
@@ -20,12 +18,14 @@ Once a factory function is bound to a name, you can call it using `get`:
 Whenever a dependency is requested, di.js will lookup the factory function by name and call it. It returns whatever the factory function returns.
 
 ### Injecting Dependencies
-You can pass dependencies to your factory functions by listing their names before the factory function:
+You can pass dependencies to your factory functions by listing their names before the factory function within an array:
 
     di.bind('random').to(['limit', function (limit) {
         // limit === di.get('limit');
         return Math.random() * limit;
     }]);
+    
+The factory function can accept any number of dependencies, even the same dependency multiple times if necessary.
     
 ### Constants
 If the value being injected is a constant value, you can use `toConstant`:
@@ -51,16 +51,16 @@ Any configurations on other containers will not appear in the new container. Thi
 ### Aliases
 You can pass multiple names to the `bind` method to create multiple aliases for the same factory function:
 
-    di.bind('add', 'sum').to([function () {
+    di.bind('add', 'sum').to(function () {
         return function (x, y) { return x + y };
-    }]);
+    });
     
 ### Async
 If you are working in an asynchronous environment, you can use the async version of the library.
 Configuring bindings is exactly the same as the synchronous operations, except operations are performed on `di.async` instead:
 
-    di.async.bind('data').to(['$http', function ($http) {
-        return $http.get('/path/to/resource');  // async operation returning promise
+    di.async.bind('data').to(['ajax', function (ajax) {
+        return ajax.get('/path/to/resource');  // async operation returning ES6 promise
     });
     
 The only real difference is that the factory functions should return a promise instead of an object. The promises need to be compatible for [ES6 promises](http://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Once you have your bindings configured, you can call `get`, which will return a promise, allowing you to work with the object:

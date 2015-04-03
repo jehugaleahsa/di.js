@@ -1,6 +1,13 @@
-'use strict';
-
-var di = (function () {
+;(function (context) {
+    "use strict";
+    
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = getContainer();
+    } else if (typeof define === 'function' && define.amd) {
+        define(getContainer);
+    } else {
+        context.di = getContainer();
+    }
     
     var isArray = Array.isArray 
         ? Array.isArray
@@ -25,16 +32,28 @@ var di = (function () {
         return container;
     };
     
+    var invalidBindingMessage = 'Encountered an invalid binding specification.';
+    var lastArgNotFunctionMessage = 'The last argument of the binding specification must be a factory method.'
+    
     function getNamedConfiguration(container, names) {
         var configuration = {};
         configuration.to = function (spec) {
-            if (!isArray(spec) || spec.length == 0) {
-                throw new Exception('Encountered an invalid binding specification.');
+            var factory;
+            if (isArray(spec)) {
+                if (spec.length === 0) {
+                    throw new Exception(invalidBindingMessage);
+                }
+                factory = spec[spec.length - 1];
+                if (typeof factory !== 'function') {
+                    throw new Exception(lastArgNotFunctionMessage);
+                }
+            } else if (typeof(spec) === 'function') {
+                factory = spec;
+                spec = [factory];
+            } else {
+                throw new Exception(invalidBindingMessage);
             }
-            var factory = spec[spec.length - 1];
-            if (typeof factory !== 'function') {
-                throw new Exception('The last argument of the binding specification must be a factory method.');
-            }
+            
             var dependencies = spec.slice(0, spec.length - 1);
             var binding = addBindings(container, names, factory, dependencies);
             return getBindingConfiguration(container, binding);
@@ -150,7 +169,7 @@ var di = (function () {
             var configuration = getNamedConfiguration(this, arguments);
             configuration.toConstant = function (value) {
                 return this.to([function () {
-					return Promise.resolve(value);
+                    return Promise.resolve(value);
                 }]);
             };
             return configuration;
@@ -167,40 +186,40 @@ var di = (function () {
     function getAsync(container, name, cache) {
         var binding = container.bindings[name];
         if (typeof binding === 'undefined') {
-			return Promise.reject();
+            return Promise.reject();
         }
         
         if (binding.scope) {
             if (name in binding.scope) {
-				var promise = binding.scope[name];
-				updateAsyncCache(cache, binding.names, promise);
-				return promise;
+                var promise = binding.scope[name];
+                updateAsyncCache(cache, binding.names, promise);
+                return promise;
             } else {
                 var promise = resolveAsync(container, name, binding, cache);
-				updateAsyncCache(binding.scope, binding.names, promise);
-				return promise;
+                updateAsyncCache(binding.scope, binding.names, promise);
+                return promise;
             }
         } else {
             var promise = resolveAsync(container, name, binding, cache);
-			return promise;
+            return promise;
         }
     }
     
     function resolveAsync(container, name, binding, cache) {
         var factory = binding.factory;
-		var promises = getDependencyPromises(container, binding, cache);
-		var promise = Promise.all(promises).then(function (values) {
-			if (name in cache) {
-				return cache[name];
-			}
+        var promises = getDependencyPromises(container, binding, cache);
+        var promise = Promise.all(promises).then(function (values) {
+            if (name in cache) {
+                return cache[name];
+            }
             var result = factory.apply(null, values);
             if (!(result instanceof Promise)) {
                 result = Promise.resolve(result);
             }
-			updateAsyncCache(cache, binding.names, result);
-			return result;
-		});
-		return promise;
+            updateAsyncCache(cache, binding.names, result);
+            return result;
+        });
+        return promise;
     }
     
     function getDependencyPromises(container, binding, cache) {
@@ -208,16 +227,15 @@ var di = (function () {
         for (var index = 0; index !== binding.dependencies.length; ++index) {
             var dependencyName = binding.dependencies[index];
             var promise = getAsync(container, dependencyName, cache);
-			promises.push(promise);
+            promises.push(promise);
         }
-		return promises;
+        return promises;
     }
-	
-	function updateAsyncCache(cache, names, promise) {
+    
+    function updateAsyncCache(cache, names, promise) {
         for (var name in names) {
             cache[name] = promise;
         }
     }
     
-    return getContainer();
-})();
+})(this);
