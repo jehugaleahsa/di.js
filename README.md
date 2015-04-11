@@ -1,5 +1,5 @@
 # di.js
-The simplest dependency injection library that could possibly work.
+The simplest sync and async dependency injection library that could possibly work.
 
 ## Overview
 di.js is a simple dependency injection library. It allows you to quickly build up an object graph of inter-dependent objects using a simple declarative configuration.
@@ -42,7 +42,7 @@ Every time you request a dependency using `get` the factory function will be cal
 You can switch back to normal behavior by calling `transient` instead.
 
 ### Spawning New Containers
-If you don't want to use the global dependency injection container, you can create a new one:
+If you don't want to use the global dependency injection container, you can create a new, empty one:
 
     var empty = di();  // creates an empty DI container
     
@@ -54,6 +54,8 @@ You can pass multiple names to the `bind` method to create multiple aliases for 
     di.bind('add', 'sum').to(function () {
         return function (x, y) { return x + y };
     });
+    
+If the binding is a singleton, the same result is returned for all aliases.
     
 ### Async
 If you are working in an asynchronous environment, you can use the async version of the library.
@@ -91,13 +93,14 @@ This library is new and will be part of a growing set of related libraries.
 If you want to make changes to the library, you can setup the development environment with:
 
     npm install gulp
-    npm install karma
-    npm install karma-phantomjs-launcher
-    npm install karma-mocha
-    npm install karma-chai
-    npm install karma-chai-as-promised
+    npm install mocha
+    npm install chai
+    npm install chai-as-promised
     
-Once your environment is setup, you can run the test suite simply by typing `gulp` at the command line.
+Once your environment is setup, you can run the test suite simply by typing `gulp` at the command line or viewing the test.html file.
+
+### Future Plans for Test Automation
+Currently, I am working on using Karma and PhantomJS to run my browser tests instead of needing to open test.html. Ideally, I would be able to reuse the same test files. I have tried various tools including requirejs and browserify with no luck. There appears PhantomJS does not support standard promises yet, and incorporating them involves a lot of hacking.
 
 ## License
 If you are looking for a license, you won't find one. The software in this project is free, as in "free as air". Feel free to use my software anyway you like. Use it to build up your evil war machine, swindle old people out of their social security or crush the souls of the innocent.

@@ -2,17 +2,11 @@
 
     var gulp = require('gulp');
     var mocha = require('gulp-mocha');
-    var karma = require('karma').server;
     this.di = require('./di.js');
+    this.mocha = require('mocha');
     this.chai = require('chai');
-    this.chai.use(require('chai-as-promised'));
-
-    gulp.task('runKarmaTests', function (done) {
-        karma.start({
-            configFile: __dirname + '/karma.config.js',
-            singleRun: true
-        }, done);
-    });
+    var chaiAsPromised = require('chai-as-promised');
+    this.chai.use(chaiAsPromised);
     
     gulp.task('runNodeTests', function () {
         return gulp.src('*.test.js', { read: false })
@@ -22,6 +16,6 @@
             }));
     });
 
-    gulp.task('default', [/*'runKarmaTests', */'runNodeTests']);
+    gulp.task('default', ['runNodeTests']);
 
 })();
