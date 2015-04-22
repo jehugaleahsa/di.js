@@ -63,7 +63,7 @@ Configuring bindings is exactly the same as the synchronous operations, except o
 
     di.async.bind('data').to(['ajax', function (ajax) {
         return ajax.get('/path/to/resource');  // async operation returning ES6 promise
-    });
+    }]);
     
 The only real difference is that the factory functions should return a promise instead of an object. The promises need to be compatible for [ES6 promises](http://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Once you have your bindings configured, you can call `get`, which will return a promise, allowing you to work with the object:
 
@@ -77,7 +77,7 @@ If for whatever reason your factory function returns a non-promise, that object 
 
     di.async.bind('data-array').to(['data', function (data) {
         return [data];
-    });
+    }]);
     
 This is equivalent to the more verbose code:
 
