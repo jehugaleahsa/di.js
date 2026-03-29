@@ -1,3 +1,5 @@
+> *Archived 2026-03-28*: This project is very old and will no longer be maintained.
+
 # di.js
 The simplest sync and async dependency injection library that could possibly work.
 
